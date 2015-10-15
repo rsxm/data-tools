@@ -1,4 +1,4 @@
-name: jwaneng_da
+name: datatools
 dependencies:
 - python>=3.4
 - pandas
