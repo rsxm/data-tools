@@ -189,13 +189,18 @@ def get_column_types(type_table, column_types_override=None):
     return column_types
 
 
-def get_tables_from_sheet(xl_sheet, context, keyword, header_offset, header_rows, table_width, max_rows=300):
+def get_tables_from_sheet(xl_sheet, context, keyword: str = '.+', 
+    header_offset: int = 0, header_rows: int = 1, table_width: int = 0, max_rows: int = 300, probe_col: int = 1, grace_rows: int = 6):
     """ Given a sheet, returns all table found from that sheet.
 
     """
     tables = []
 
-    probe = xl_sheet.iter_rows(range_string='A1:A{max_rows}'.format(max_rows=max_rows))
+    probe_range = row_column_to_range((1, probe_col), (max_rows, probe_col))
+    # print(probe_range)
+
+    # probe = xl_sheet.iter_rows(range_string='A1:A{max_rows}'.format(max_rows=max_rows))
+    probe = xl_sheet.iter_rows(range_string=probe_range)
     probe = [i[0].value for i in probe]
 
     regex = re.compile(keyword)
@@ -206,7 +211,10 @@ def get_tables_from_sheet(xl_sheet, context, keyword, header_offset, header_rows
 
     for i in idx:
         ds = de = i + header_offset + header_rows - 1
-        while probe[de + 1] and (de < (len(probe)-2)):
+        # This breaks
+
+        while ''.join([x for x in probe[de: de + 1 + grace_rows] if x is not None]) and (de < (len(probe)-2)):
+            # print(''.join([x for x in probe[de: 1 + grace_rows] if x is not None])[:4])
             de += 1
 
         if de - ds > 0:
@@ -222,7 +230,8 @@ def get_tables_from_sheet(xl_sheet, context, keyword, header_offset, header_rows
     return tables
 
 
-def get_tables(df_files, sheet_filter, table_start_keyword, header_offset, header_rows, table_width):
+def get_tables(df_files, sheet_filter, table_start_keyword, 
+    header_offset: int = 0, header_rows: int = 1, table_width: int = 0, probe_col: int = 1, grace_rows: int = 6):
     """ Get all tables
 
     """
@@ -244,7 +253,8 @@ def get_tables(df_files, sheet_filter, table_start_keyword, header_offset, heade
                 xl_sheet = workbook.get_sheet_by_name(sheet_name)
                 context = dict(file_id=file_id, file_path=file_data['file_path'], sheet_name=sheet_name)
                 tables += get_tables_from_sheet(
-                    xl_sheet, context, table_start_keyword, header_offset, header_rows, table_width)
+                    xl_sheet, context, keyword=table_start_keyword, 
+                    header_offset=header_offset, header_rows=header_rows, table_width=table_width, probe_col=probe_col, grace_rows=grace_rows)
 
     if tables:
         df = pd.DataFrame(tables)

@@ -1,0 +1,4 @@
+pathspec==0.4.0
+pandas==0.18.1
+openpyxl==2.3.5
+xlrd==1.0.0

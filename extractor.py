@@ -95,7 +95,7 @@ if __name__ == '__main__':
     logger.critical('START')
     logger.info('-------------------------------------------------')
     # for data_set in ['recrush', 'mtp', 'red_area']:
-    for data_set in ['mtp']:
+    for data_set in ['questions']:
         logger.info('New data set: %s' % data_set)
         logger.info('-------------------------------------------------')
         module = importlib.import_module('config.' + data_set)
